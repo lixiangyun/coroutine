@@ -1,0 +1,39 @@
+import os
+import os.path
+import sys
+
+Import('env')
+Import('headfile')
+Import('dependlist')
+Import('initlist')
+Import('package')
+Import('configure')
+config = []
+
+
+initfun = ['NS_ListInit','NS_ListFini']
+depends = ['d_def']
+
+
+pkg = sys.path[0]
+pkg = pkg.split('/')[-1]
+package.append(pkg)
+
+temp = {pkg:initfun}
+initlist.update(temp)
+
+temp = {pkg:depends}
+dependlist.update(temp)
+
+temp = {pkg:config}
+configure.update(temp)
+
+all_head = Glob('include/*.h')
+for temp in all_head:
+    headfile.append(temp)
+
+inc = ['include']
+for temp in depends:
+    inc.append('../%s/include' % temp)
+obj = env.Object(Glob('src/*.c'),CPPPATH = inc)
+Return('obj')
