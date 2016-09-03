@@ -19,8 +19,11 @@ extern "C"{
 
 #include "d_base.h"
 
+#define ns_stdin  0
+#define ns_stdout 1
+#define ns_stderr 2
 
-#define MAX_FORMAT_LEN 1024
+#define MAX_FORMAT_LEN 128
 
 typedef VOID (* OSAL_LOG_WRITE_HOOK)(UINT32 ulLevel,
                                      UINT32 ulErrId,
@@ -37,22 +40,26 @@ VOID nslogwrite(const char * func,
                    const char * pformat,
                    ...)
 {
-    char     nbuf[1024];
+        char     nbuf[MAX_FORMAT_LEN] = {0};
     va_list  argptr;
     int      cnt;
+    int      ret;
 
-    snprintf(nbuf,MAX_FORMAT_LEN,"\r\n[LOG-ERROR]:func(%s),file(%s),line(%d): ",func,file,uiLine);
+    ret = snprintf(nbuf,MAX_FORMAT_LEN,"\r\n[LOG-ERROR] func(%s) line(%d):",func,uiLine);
+    if( ret < 0 )
+    {
+        return;
+    }
 
-    cnt = strlen(nbuf);
+    cnt = ret;
 
     va_start(argptr, pformat);
-    cnt = vsnprintf(nbuf + cnt ,MAX_FORMAT_LEN - cnt,pformat, argptr);
+    ret = vsnprintf(nbuf + cnt , MAX_FORMAT_LEN - cnt,pformat, argptr);
     va_end(argptr);
 
-    cnt = strlen(nbuf);
+    cnt += ret;
 
-    write(2,nbuf,cnt);
-
+    write(ns_stderr, nbuf, cnt);
 }
 
 VOID nsloginfo(const char * func,
@@ -61,22 +68,26 @@ VOID nsloginfo(const char * func,
                    const char * pformat,
                    ...)
 {
-    char     nbuf[1024];
+    char     nbuf[MAX_FORMAT_LEN] = {0};
     va_list  argptr;
     int      cnt;
+    int      ret;
 
-    snprintf(nbuf,MAX_FORMAT_LEN,"\r\n[LOG-INFO]:func(%s),file(%s),line(%d): ",func,file,uiLine);
+    ret = snprintf(nbuf,MAX_FORMAT_LEN,"\r\n[LOG-INFO] func(%s) line(%d):",func,uiLine);
+    if( ret < 0 )
+    {
+        return;
+    }
 
-    cnt = strlen(nbuf);
+    cnt = ret;
 
     va_start(argptr, pformat);
-    cnt = vsnprintf(nbuf + cnt , MAX_FORMAT_LEN - cnt,pformat, argptr);
+    ret = vsnprintf(nbuf + cnt , MAX_FORMAT_LEN - cnt,pformat, argptr);
     va_end(argptr);
 
-    cnt = strlen(nbuf);
+    cnt += ret;
 
-    write(1,nbuf,cnt);
-
+    write(ns_stdout,nbuf,cnt);
 }
 
 

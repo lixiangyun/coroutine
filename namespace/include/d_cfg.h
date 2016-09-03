@@ -21,19 +21,18 @@ extern "C"{
 
 UINT32 NS_Start(char * cfg);
 
+UINT32 NS_Stop(VOID);
+
 #define CFG_KEY_NAME_LEN 32
 
 #define CFG_STR_VAL_LEN 128
-
-typedef UINT32 (* NS_START_HOOK)(VOID);
-
-UINT32 NS_StartHookSet(NS_START_HOOK pfnHook);
-
 
 
 UINT32 NS_CfgUintValueGet(char * keys,char * name,UINT32 uiValue);
 
 VOID * NS_CfgPtrValueGet(char * keys,char * name,VOID * ptr);
+
+char * NS_CfgStrValueGet(char * keys,char * name,char * string);
 
 
 #endif

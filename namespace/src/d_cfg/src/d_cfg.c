@@ -33,12 +33,6 @@ extern struct tagstartlist g_aStartList[];
 
 char * cfglist  = NULL;
 
-struct tagstartlisthook {
-    NS_LIST_NODE  stList;
-    NS_START_HOOK pfnHook;
-};
-
-NS_LIST_NODE stStartHookList;
 
 UINT32 NS_CfgInit(char * keys)
 {
@@ -101,7 +95,7 @@ UINT32 nsstartinit()
     UINT32 uiRet;
     struct tagstartlist * plist;
 
-    for(plist = g_aStartList;plist->pinit != NULL;plist++)
+    for(plist = g_aStartList; plist->pinit != NULL;plist++)
     {
         uiRet = plist->pinit(plist->name);
         if(uiRet)
@@ -116,6 +110,30 @@ UINT32 nsstartinit()
     return OK;
 }
 
+UINT32 nsstopfini()
+{
+    UINT32 uiRet;
+    struct tagstartlist * plist;
+
+    for(plist = g_aStartList; plist->pinit != NULL;plist++)
+    {
+
+    }
+
+    for( plist-- ; plist >= g_aStartList ; plist--)
+    {
+        uiRet = plist->pfini();
+        if(uiRet)
+        {
+            LOG("stop module %s failed!(ret=%u)",plist->name,uiRet);
+            return uiRet;
+        }
+
+        INFO("stop module %s success!" , plist->name );
+    }
+
+    return OK;
+}
 
 UINT32 NS_Start(char * cfg)
 {
@@ -126,8 +144,6 @@ UINT32 NS_Start(char * cfg)
         LOG("Invald Param!\n");
         return ERROR;
     }
-
-    NS_LIST_INIT(&stStartHookList);
 
     pcfg = nsloadcfg(cfg);
     if(NULL == pcfg)
@@ -147,6 +163,25 @@ UINT32 NS_Start(char * cfg)
 
     return OK;
 }
+
+UINT32 NS_Stop()
+{
+    if( NULL == cfglist )
+    {
+        LOG("please start first!");
+        return INVAL;
+    }
+
+    if( OK != nsstopfini() )
+    {
+        return ERROR;
+    }
+
+    free(cfglist);
+
+    return OK;
+}
+
 
 /* d_mem.NS_MEM_SIZE=1048576 */
 UINT32 NS_CfgUintValueGet(char * keys,char * name,UINT32 uiValue)
@@ -189,7 +224,7 @@ VOID * NS_CfgPtrValueGet(char * keys,char * name,VOID * ptr)
         ptemp = strstr(cfglist,nbuf);
         if( ptemp )
         {
-            ptemp += uiLen;
+            ptemp += uiLen + 1;
             pcfgPtr = dlsym(NULL,ptemp);
             if( pcfgPtr )
             {
@@ -201,6 +236,63 @@ VOID * NS_CfgPtrValueGet(char * keys,char * name,VOID * ptr)
     LOG("Can not find cfg %s!\n",nbuf);
 
     return ptr;
+}
+
+UINT32 ns_strlen(char * name)
+{
+    UINT32 uilen = 0;
+
+    while( *name != '\0'
+        && *name != '\n'
+        && *name != '\r' )
+    {
+        name++;
+        uilen++;
+    }
+
+    return uilen;
+}
+
+char * NS_CfgStrValueGet(char * keys,char * name,char * string)
+{
+    char   nbuf[CFG_STR_VAL_LEN + CFG_KEY_NAME_LEN + 2];
+    char * ptemp;
+    char * pcfgPtr;
+    UINT32 uiLen;
+
+    if( cfglist )
+    {
+        snprintf(nbuf,CFG_STR_VAL_LEN + CFG_KEY_NAME_LEN + 2,"%s.%s",keys,name);
+        uiLen = strlen(nbuf);
+        ptemp = strstr(cfglist,nbuf);
+        if( ptemp )
+        {
+            ptemp += uiLen + 1;
+
+            uiLen = ns_strlen(ptemp);
+            if( 0 == uiLen )
+            {
+                LOG("Can not find cfg %s value !",nbuf);
+                return string;
+            }
+
+            pcfgPtr = malloc(uiLen + 1);
+            if( 0 == pcfgPtr )
+            {
+                LOG("malloc %u size failed!",uiLen);
+                return string;
+            }
+
+            strncpy(pcfgPtr, ptemp, uiLen );
+            pcfgPtr[uiLen] = '\0';
+
+            return pcfgPtr;
+        }
+    }
+
+    LOG("Can not find cfg %s!\n",nbuf);
+
+    return string;
 }
 
 

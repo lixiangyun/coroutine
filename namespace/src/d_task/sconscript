@@ -10,9 +10,19 @@ Import('package')
 Import('configure')
 config = []
 
+
+
+
 #user configure this here
-initfun = ['nsnullfun','nsnullfun']
-depends = ['d_def','d_list','d_cfg','d_lock']
+#config.append(['MSG_CONFIG_0','abc'])
+#config.append(['MSG_CONFIG_1',256])
+
+initfun = ['NS_TaskInit','NS_TaskFini']
+depends = ['d_def','d_list','d_lock']
+
+
+
+
 
 
 pkg = sys.path[0]

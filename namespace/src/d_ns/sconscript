@@ -11,8 +11,13 @@ Import('configure')
 config = []
 
 #user configure this here
-initfun = ['nsnullfun','nsnullfun']
-depends = ['d_def','d_list','d_cfg','d_lock']
+config.append(['HTTP_PORT',8080])
+config.append(['MAX_CONNECT',2048])
+config.append(['THREAD_NUM',4])
+config.append(['LOG_FILE','./ns.log'])
+
+initfun = ['NS_NameServerInit','NS_NameServerFini']
+depends = ['d_def','d_list','d_cfg','d_time','d_task']
 
 
 pkg = sys.path[0]

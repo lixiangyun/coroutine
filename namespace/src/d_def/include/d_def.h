@@ -50,15 +50,10 @@ typedef UINT32        BOOL;
 #define ALIGNMENT_EIGHT(ulNum)    ((ulNum + 7)&(~7))
 
 #define OK     0
-
 #define ERROR -1
-
 
 #define TRUE  1
 #define FALSE 0
-
-
-
 
 
 #endif
