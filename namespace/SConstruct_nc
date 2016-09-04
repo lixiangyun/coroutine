@@ -6,8 +6,20 @@ import sys
 
 env = Environment()
 
+#######################################
+program = 'nc'
+buildtype = 'CLIENT'
+
+env.Append(CCFLAGS = ("-D%s"%buildtype))
+env.Append(PROGRAM = buildtype)
+
+configfile = ('%s.cfg'%program)
+#######################################
+
+
 env.Append(CCFLAGS = '-g')
 env.Append(CCFLAGS = '-Wall')
+env.Append(CCFLAGS = '-DDEBUG')
 
 env.Append(cc = 'gcc')
 env.Append(CPPPATH = [''])
@@ -16,8 +28,10 @@ env.Append(LIBPATH = [''])
 env.Append(LINKFLAGS = '-rdynamic')
 env.Append(LIBS = ["rt","dl","pthread"])
 
-
 Export('env')
+
+#for get debug information
+#print env.Dump()
 
 package    = []
 headfile   = []
@@ -111,7 +125,7 @@ for temp in headfile:
 if not os.path.exists('lib'):
     os.mkdir('lib')
 
-fp = open('src/init.c','w')
+fp = open(("src/init%s.c"%program),'w')
 
 length = len(startsort)
 i = 0
@@ -133,12 +147,12 @@ while i < length:
 fp.write("   {0,0,0}\n};\n")
 fp.close()
 
-objs.append("src/init.c")
-env.Program('namespace', objs)
+objs.append("src/init%s.c"%program)
+env.Program(program, objs)
 
 
 #make cfg for run.
-fp_cfg = open('ns.cfg','w')
+fp_cfg = open(configfile,'w')
 #pdb.set_trace()
 for pkg in package:
     cfglist = configure[pkg]

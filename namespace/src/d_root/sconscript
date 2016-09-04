@@ -11,7 +11,9 @@ Import('configure')
 config = []
 
 #user configure this here
-initfun = ['nsnullfun','nsnullfun']
+
+
+initfun = ['NS_RootInit','NS_RootFini']
 depends = ['d_def','d_list','d_cfg','d_lock']
 
 

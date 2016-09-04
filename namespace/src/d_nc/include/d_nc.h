@@ -1,5 +1,6 @@
 /********************************************
 *
+*  Á´±í²Ù×÷
 *
 ********************************************/
 
@@ -10,12 +11,14 @@ extern "C"{
 #endif /* __cplusplus */
 
 
-#ifndef _NS_NAMESERVER_H_
-#define _NS_NAMESERVER_H_
-#endif /* _NS_NAMESERVER_H_ */
+#ifndef _NS_LIST_H_
+#define _NS_LIST_H_
+#endif /* _NS_LIST_H_ */
 
 
 #include "d_def.h"
+
+
 
 
 

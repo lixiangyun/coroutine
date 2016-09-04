@@ -20,6 +20,15 @@ extern "C"{
 
 SemHanle g_uiSema;
 
+UINT32 NS_RootInit(char * keys)
+{
+    return OK;
+}
+
+UINT32 NS_RootFini()
+{
+    return OK;
+}
 
 
 void close_process(int no, siginfo_t * info, void * ptr )
@@ -70,6 +79,7 @@ UINT32 register_signal()
 
 int main(int argv,char ** argc)
 {
+    BOOL   bFlag = FALSE;
     CHAR * cfgfile = "./ns.cfg";
     UINT32 uil;
     UINT32 uiRet;
@@ -81,8 +91,11 @@ int main(int argv,char ** argc)
             if( uil + 1 < argv )
             {
                 cfgfile = argc[uil + 1];
-                break;
             }
+        }
+        if( strstr(argc[uil],"-d") )
+        {
+            bFlag = TRUE;
         }
     }
 
@@ -100,25 +113,35 @@ int main(int argv,char ** argc)
         return NOMEM;
     }
 
-    uiRet = register_signal();
-    if( OK != uiRet )
+    if( bFlag )
     {
-        LOG("register signal failed!");
-        return NOMEM;
+        uiRet = register_signal();
+        if( OK != uiRet )
+        {
+            LOG("register signal failed!");
+            return NOMEM;
+        }
+
+        NS_SemP(g_uiSema);
+
+        INFO("receive shut down signal.");
+
+        if(OK != NS_Stop())
+        {
+            return ERROR;
+        }
+
+        INFO("namespace exit success.");
+
+        (VOID)NS_SemDelete(g_uiSema);
     }
-
-    NS_SemP(g_uiSema);
-
-    INFO("receive shut down signal.");
-
-    if(OK != NS_Stop())
+    else
     {
-        return ERROR;
+        while(1)
+        {
+            NS_TaskDelay(1000);
+        }
     }
-
-    INFO("namespace exit success.");
-
-    (VOID)NS_SemDelete(g_uiSema);
 
 	return OK;
 }
